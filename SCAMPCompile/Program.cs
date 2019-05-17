@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 using SCAMP;
 
 namespace SCAMPCompile
@@ -11,42 +13,69 @@ namespace SCAMPCompile
         {
             try
             {
-                string programScript = args[0];
-                int count = args.Length;
-                int wrongParams = (count - 1) % 2;
-                if(wrongParams>0)
+                ConstantList constants = new ConstantList();
+                string programScript = null;
+                foreach(var p in args)
                 {
-                    Console.WriteLine("Wrong parameters count");
-                    return;
+                    Console.WriteLine(p);
                 }
-                int paramcount = ((count - 1)/ 2);
-                List<ProgramParam> programParams = new List<ProgramParam>();
-                for(int i = 1; i <= paramcount; i++)
+                foreach (var p in args)
                 {
-                    var pp = new ProgramParam(args[2*i -1], args[2*i]);
-                    programParams.Add(pp);
+                    Match m;
+                    if ((m = Regex.Match(p, @"-(?<op>[dx])(?<key>[^=]*)(?>=(?<value>.*))?")).Success)
+                    {
+                        var op = m.Groups[@"op"].Value;
+                        var key = m.Groups[@"key"]?.Value;
+                        var value = m.Groups[@"value"]?.Value;
+                        switch (op)
+                        {
+                            case @"d":
+                                constants.Add(new Constant() { Name = key, Value = value });
+                                break;
+                            case @"x":
+                                Device device;
+                                XmlSerializer serializer = new XmlSerializer(typeof(Device));
+                                try
+                                {
+                                    var fs = new FileStream(key+".xml", FileMode.Open);
+                                    device = serializer.Deserialize(fs) as Device;
+                                    foreach (var port in device.Port)
+                                    {
+                                        constants.Add(new Constant() { Name = port.Alias, Value = port.Address.ToString() });
+                                    }
+                                }
+                                catch
+                                {
+                                    device = new Device();
+                                }
+                                break;
+                            default:
+                                throw new Exception("Unknown switch '" + op + "'");
+                        }
+                    }
+                    else
+                    {
+                        if (programScript != null)
+                        {
+                            throw new Exception("Duplicate program block");
+                        }
+                        programScript = p;
+                    }
                 }
                 programScript = programScript.Replace("\\r\\n", "\r\n");
-                ConstantList constants = new ConstantList();
-                foreach(var pp in programParams)
-                {
-                    Constant constant = new Constant();
-                    constant.Name = pp.Name;
-                    constant.Value = pp.ParamStr;
-                    constant.Comment = "FromParam";
-                }
+
                 var assembly = new Assembly(programScript, constants);
                 var listing = assembly.GetListing();
                 var programBytes = Assembly.Compile(listing);
-                foreach(var b in programBytes)
+                foreach (var b in programBytes)
                 {
                     Console.Write(b.ToString("X2"));
                 }
                 Console.WriteLine();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                Console.WriteLine("Can't compile script: "+ e.Message);
+                Console.WriteLine("Can't compile script: " + e.Message);
             }
         }
     }

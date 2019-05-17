@@ -2,7 +2,7 @@
   "profiles": {
     "SCAMPCompile": {
       "commandName": "Project",
-      "commandLineArgs": "\"b equ 0\\r\\n psh TAMPER\\r\\n inp b, b\\r\\n psh 1\\r\\n xor b\\r\\nret\" TAMPER 20"
+      "commandLineArgs": "\" ret\" -db=0 -xdevice"
     }
   }
 }

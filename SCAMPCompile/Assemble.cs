@@ -91,15 +91,7 @@ namespace SCAMP
 
         public Assembly(string text, ConstantList predefined = null)
         {
-            if (predefined != null)
-            {
-                _Constants = predefined;
-            }
-            else
-            {
-                _Constants = new ConstantList();
-            }
-            _Constants = new ConstantList();
+            _Constants = predefined ?? new ConstantList();
             _Macros = new MacroList();
             _Body = new List<Opcode>();
 
