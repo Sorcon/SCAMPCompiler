@@ -15,20 +15,33 @@ namespace SCAMPCompile
             {
                 ConstantList constants = new ConstantList();
                 string programScript = null;
-                foreach(var p in args)
-                {
-                    Console.WriteLine(p);
-                }
+                //foreach(var p in args)
+                //{
+                //    Console.WriteLine(p);
+                //}
                 foreach (var p in args)
                 {
                     Match m;
-                    if ((m = Regex.Match(p, @"-(?<op>[dx])(?<key>[^=]*)(?>=(?<value>.*))?")).Success)
+                    if ((m = Regex.Match(p, @"-(?<op>[fdx])(?<key>[^=]*)(?>=(?<value>.*))?")).Success)
                     {
                         var op = m.Groups[@"op"].Value;
                         var key = m.Groups[@"key"]?.Value;
                         var value = m.Groups[@"value"]?.Value;
                         switch (op)
                         {
+                            case @"f":
+                                if (programScript != null)
+                                {
+                                    throw new Exception("Duplicate program block");
+                                }
+                                string fname = "";
+                                if (File.Exists(key + ".sasm")) fname = key + ".sasm";
+                                if (File.Exists(key + ".asm")) fname = key + ".asm";
+                                if (fname != "")
+                                    programScript = File.ReadAllText(fname);
+                                else
+                                    throw new Exception("Assembler file not found");
+                                break;
                             case @"d":
                                 constants.Add(new Constant() { Name = key, Value = value });
                                 break;
@@ -63,6 +76,7 @@ namespace SCAMPCompile
                     }
                 }
                 programScript = programScript.Replace("\\r\\n", "\r\n");
+                programScript = programScript.Replace("\\n", "\n");
 
                 var assembly = new Assembly(programScript, constants);
                 var listing = assembly.GetListing();
@@ -71,7 +85,6 @@ namespace SCAMPCompile
                 {
                     Console.Write(b.ToString("X2"));
                 }
-                Console.WriteLine();
             }
             catch (Exception e)
             {
