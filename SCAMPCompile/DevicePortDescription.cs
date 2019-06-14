@@ -63,7 +63,6 @@ public partial class DevicePort
 }
 
 [System.SerializableAttribute()]
-[System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
 [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
 public partial class ValueRange
@@ -77,6 +76,6 @@ public partial class ValueRange
     [System.Xml.Serialization.XmlAttributeAttribute()]
     public string Name;
 
-    [System.Xml.Serialization.XmlTextAttribute()]
-    public string Description;
+    //[System.Xml.Serialization.XmlTextAttribute()]
+    //public string Description;
 }
