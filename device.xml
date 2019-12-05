@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Device name="SecurityHub 2.0">
+  <Range Name="Section" Min="0" Max="8" />
+  <Range Name="Zone" Min="1" Max="30" />
+  <Port Address="0" Width="32" Alias="TICKS">Internal start-up timer value with 1/256 second quantum</Port>
+  <Port Address="1" Width="32" Alias="TIMESTAMP">Internal start-up timer value with 1 second quantum</Port>
+  <Port Address="10" Width="6" Alias="RT_SEC">Real-time seconds value</Port>
+  <Port Address="11" Width="6" Alias="RT_MIN">Real-time minutes value</Port>
+  <Port Address="12" Width="5" Alias="RT_HOUR">Real-time hour value</Port>
+  <Port Address="13" Width="3" Alias="RT_DAY">Real-time day-of-week value</Port>
+  <Port Address="14" Width="5" Alias="RT_DATE">Real-time date value</Port>
+  <Port Address="15" Width="3" Alias="RT_MONTH">Real-time month value</Port>
+  <Port Address="16" Width="8" Alias="RT_YEAR">Real-time year value</Port>
+  <Port Address="20" Width="1" Alias="TAMPER">Indicates device case is opened</Port>
+  <Port Address="21" Width="1" Alias="HAS_SENSORS">Indicates if any zones is registered</Port>
+  <Port Address="22" Width="1" Alias="ALERT">Indicates if any of zones is in trouble: either has flags (MALFUNCTION | TAMPER | LOST) or detects alarm  when exit delay not applied. Same as "Red/green flashing - ready to arm" indicator.</Port>
+  <Port Address="23" Width="1" Alias="ALARM">Indicates if any of armed zones detects alarm</Port>
+  <Port Address="24" Width="1" Alias="PANIC">Indicates if panic button was pressed, active for 600 seconds after depress</Port>
+  <Port Address="25" Width="1" Alias="PATROL">Indicates if site is under patrol, active for 3600 seconds after patrol started</Port>
+  <Port Address="26" Width="1" Alias="EXIT_DELAY">Indicates if exit delay is in progress</Port>
+  <Port Address="27" Width="1" Alias="ENTRY_DELAY">Indicates if entry delay is in progress</Port>
+  <Port Address="28" Width="1" Alias="ENTRY_DELAY_ENABLED">Indicates if entry delay is postponed upon next entry alarm</Port>
+  <Port Address="30" Width="8" Alias="ARMED_SECTIONS">8-bit mask of armed sections, 1 indicates armed, 0 - disarmed</Port>
+  <Port Address="31" Width="8" Alias="ALARMING_SECTIONS">8-bit mask of alarming sections, 1 indicates alarm, 0 - no alarm</Port>
+  <Port Address="128" Width="3" Range="Section" Alias="SECTION_TYPE_BASE">$ type (as XProtoConst.h SECTION_TYPE__*)</Port>
+  <Port Address="256" Width="1" Range="Zone" Alias="ZONE_ALARM_FLAG_BASE">$ has ALARM affect flag</Port>
+  <Port Address="512" Width="1" Range="Zone" Alias="ZONE_SABOTAGE_FLAG_BASE">$ has SABOTAGE affect flag</Port>
+  <Port Address="768"  Width="1" Range="Zone" Alias="ZONE_MALFUNCTION_FLAG_BASE">$ has MALFUNCTION affect flag</Port>
+  <Port Address="1024" Width="1" Range="Zone" Alias="ZONE_ATTENTION_FLAG_BASE">$ has ATTENTION affect flag</Port>
+  <Port Address="1280" Width="1" Range="Zone" Alias="ZONE_ARM_FLAG_BASE">$ has ARM affect flag</Port>
+  <Port Address="1536" Width="1" Range="Zone" Alias="ZONE_POWER_FLAG_BASE">$ has LOW_POWER affect flag</Port>
+  <Port Address="1792" Width="1" Range="Zone" Alias="ZONE_LOST_FLAG_BASE">$ has LOST affect flag</Port>
+  <Port Address="2048" Width="1" Range="Zone" Alias="ZONE_DETECT_FLAG_BASE">$ detect flag, regardless of the ARM state</Port>
+  <Port Address="2304" Width="1" Range="Zone" Alias="ZONE_ENTRYDELAY_FLAG_BASE">$ entry delay is active flag</Port>
+  <Port Address="2560" Width="1" Range="Zone" Alias="ZONE_EXITDELAY_FLAG_BASE">$ exit delay is active flag</Port>
+  <Port Address="4096" Width="5" Range="Zone" Alias="ZONE_SECTION_BASE">$ section number</Port>
+  <Port Address="4352" Width="7" Range="Zone" Alias="ZONE_BATTERY_BASE">$ battery charge</Port>
+  <Port Address="4608" Width="7" Range="Zone" Alias="ZONE_SIGNAL_BASE">$ signal strength</Port>
+  <Port Address="4864" Width="8" Range="Zone" Alias="ZONE_TEMPERATURE_BASE">$ temperature</Port>
+  <Port Address="5120" Width="8" Range="Zone" Alias="ZONE_TEMPERATURE2_BASE">$ temperature 2</Port>
+</Device>
