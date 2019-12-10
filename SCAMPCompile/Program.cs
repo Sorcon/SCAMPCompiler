@@ -22,104 +22,128 @@ namespace SCAMPCompile
                 //{
                 //    Console.WriteLine(p);
                 //}
-                foreach (var p in args)
+                try
                 {
-                    Match m;
-                    if ((m = Regex.Match(p, @"-(?<op>[fdx])(?<key>[^=]*)(?>=(?<value>.*))?")).Success)
+                    foreach (var p in args)
                     {
-                        var op = m.Groups[@"op"].Value;
-                        var key = m.Groups[@"key"]?.Value;
-                        var value = m.Groups[@"value"]?.Value;
-                        switch (op)
+                        Match m;
+                        if ((m = Regex.Match(p, @"-(?<op>[fdx])(?<key>[^=]*)(?>=(?<value>.*))?")).Success)
                         {
-                            case @"f":
-                                if (programScript != null)
-                                {
-                                    throw new Exception("Duplicate program block");
-                                }
-                                string fname = "";
-                                if (key.EndsWith(".asm") || key.EndsWith(".ASM") || key.EndsWith(".sasm") || key.EndsWith(".SASM"))
-                                    fname = key;
-                                else
-                                {
-                                    if (File.Exists(key + ".sasm")) fname = key + ".sasm";
-                                    if (File.Exists(key + ".asm")) fname = key + ".asm";
-                                }
-                                if (fname != "")
-                                    programScript = File.ReadAllText(fname);
-                                else
-                                    throw new Exception("Assembler file not found");
-                                break;
-                            case @"d":
-                                constants.Add(new Constant() { Name = key, Value = value });
-                                break;
-                            case @"x":
-                                Device device;
-                                try
-                                {
-                                    device_name = key + ".xml";
-                                    device_str = File.ReadAllText(key + ".xml");
-                                    device_str.Replace("\r", "");
-                                    device_str.Replace("\n", "");
-                                    XmlSerializer serializer = new XmlSerializer(typeof(Device));
-                                    TextReader reader = new StringReader(device_str);
-                                    device = (Device)serializer.Deserialize(reader);
-                                    Console.WriteLine(device.name);
-                                    //var fs = new FileStream(key + ".xml", FileMode.Open);
-
-                                    //device = serializer.Deserialize() as Device;
-                                    foreach (var port in device.Port)
+                            var op = m.Groups[@"op"].Value;
+                            var key = m.Groups[@"key"]?.Value;
+                            var value = m.Groups[@"value"]?.Value;
+                            switch (op)
+                            {
+                                case @"f":
+                                    if (programScript != null)
                                     {
-                                        constants.Add(new Constant() { Name = port.Alias, Value = port.Address.ToString() });
+                                        throw new Exception("Duplicate program block");
                                     }
-                                }
-                                catch(Exception e)
-                                {
-                                    device = new Device();
-                                    Console.WriteLine("Device XML serialize exception! Message:"+ e.Message);
-                                    Exception t = e.InnerException;
-                                    do
+                                    string fname = "";
+                                    if (key.EndsWith(".asm") || key.EndsWith(".ASM") || key.EndsWith(".sasm") || key.EndsWith(".SASM"))
+                                        fname = key;
+                                    else
                                     {
-                                        Console.WriteLine(t.Message);
-                                        t = t.InnerException;
-                                    } while (t.InnerException != null);
-                                }
-                                break;
-                            default:
-                                throw new Exception("Unknown switch '" + op + "'");
-                        }
-                    }
-                    else
-                    {
-                        if (programScript != null)
-                        {
-                            throw new Exception("Duplicate program block");
-                        }
-                        programScript = p;
-                    }
-                }
-                programScript = programScript.Replace("\\r\\n", "\r\n");
-                programScript = programScript.Replace("\\n", "\n");
+                                        if (File.Exists(key + ".sasm")) fname = key + ".sasm";
+                                        if (File.Exists(key + ".asm")) fname = key + ".asm";
+                                    }
+                                    if (fname != "")
+                                        programScript = File.ReadAllText(fname);
+                                    else
+                                        throw new Exception("Assembler file not found");
+                                    break;
+                                case @"d":
+                                    constants.Add(new Constant() { Name = key, Value = value });
+                                    break;
+                                case @"x":
+                                    Device device;
+                                    try
+                                    {
+                                        device_name = key + ".xml";
+                                        device_str = File.ReadAllText(key + ".xml");
+                                        device_str.Replace("\r", "");
+                                        device_str.Replace("\n", "");
+                                        XmlSerializer serializer = new XmlSerializer(typeof(Device));
+                                        TextReader reader = new StringReader(device_str);
+                                        device = (Device)serializer.Deserialize(reader);
+                                        //Console.WriteLine(device.name);
+                                        //var fs = new FileStream(key + ".xml", FileMode.Open);
 
-                var assembly = new Assembly(programScript, constants);
-                var listing = assembly.GetListing();
-                var programBytes = Assembly.Compile(listing);
-                foreach (var b in programBytes)
+                                        //device = serializer.Deserialize() as Device;
+                                        foreach (var port in device.Port)
+                                        {
+                                            constants.Add(new Constant() { Name = port.Alias, Value = port.Address.ToString() });
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        device = new Device();
+                                        string errorMessage = "";
+                                        errorMessage+= "Device XML serialize exception! Message:" + e.Message;
+                                        Exception t = e.InnerException;
+                                        do
+                                        {
+                                            errorMessage+=t.Message;
+                                            t = t.InnerException;
+                                        } while (t.InnerException != null);
+
+                                        Console.WriteLine($"{{\"result\": -4, \"message\": \"{errorMessage}\"}}");
+                                        return;
+
+                                    }
+                                    break;
+                                default:
+                                    throw new Exception("Unknown switch '" + op + "'");
+                            }
+                        }
+                        else
+                        {
+                            if (programScript != null)
+                            {
+                                throw new Exception("Duplicate program block");
+                            }
+                            programScript = p;
+                        }
+                    }
+                } catch (Exception exc)
                 {
-                    Console.Write(b.ToString("X2"));
+                    Console.WriteLine($"{{\"result\": -3, \"message\": \"{exc.Message}\"}}");
+                    return;
                 }
+                
+                try
+                {
+                    programScript = programScript.Replace("\\r\\n", "\r\n");
+                    programScript = programScript.Replace("\\n", "\n");
+
+                    var assembly = new Assembly(programScript, constants);
+                    var listing = assembly.GetListing();
+                    var programBytes = Assembly.Compile(listing);
+
+                    string binPropgram = "";
+                    foreach (var b in programBytes)
+                    {
+                        binPropgram += b.ToString("X2");
+                    }
+                    Console.WriteLine($"{{\"result\": 1, \"message\":\"{binPropgram}\"}}");
+                    return;
+                }
+                catch (Exception exc)
+                {
+                    Console.WriteLine($"{{\"result\": -1, \"message\": \"{exc.Message}\"}}");
+                    return;
+                }
+                
+                
             }
             catch (Exception e)
             {
-                Console.WriteLine("Can't compile script: " + e.Message);
-                Console.WriteLine();
-                Console.Write("\"");
-                if (programScript != null)
-                {
-                    Console.Write(programScript);
-                }
-                Console.Write("\"");
-                Console.WriteLine("Device file name:" + device_name + " with data:" + device_str);
+                string errorMessage = "";
+                errorMessage+= "Can't compile script! " + e.Message;
+                errorMessage+= "Device file name:" + device_name + " with data:" + device_str;
+
+                Console.WriteLine($"{{\"result\": -2, \"message\": \"{errorMessage}\"}}");
+                return;
             }
         }
     }
