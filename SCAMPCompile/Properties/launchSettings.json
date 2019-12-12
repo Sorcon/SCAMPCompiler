@@ -2,7 +2,7 @@
   "profiles": {
     "SCAMPCompile": {
       "commandName": "Project",
-      "commandLineArgs": "\"pw macro ; word\\n psh (($1 >> 12) & 15)\\n nib (($1 >> 8) & 15)\\n psh (($1 >> 4) & 15)\\n nib ($1 & 15)\\nendm\\n\\npb macro ; byte\\n psh (($1 >> 4) & 15)\\n nib ($1 & 15)\\nendm\\n\\nup macro\\n psh (((($1 & 3) | ($2 << 2)) >> 4) & 15)\\n nib (($1 & 3) | ($2 << 2) & 15)\\n mov\\nendm\\n\\n;BEGIN\\n \\n up dw, 1\\n dup dw\\n \\n pb TIMESTAMP\\n inp b, dw\\n \\n cmp dw\\n skp\\n bra timeout\\n \\n up b, 4\\n ret\\n \\ntimeout\\n pop dw\\n pb TIMESTAMP\\n inp b, dw\\n psh 0\\n psh 0\\n pw DELAY\\n add dw\\n \\n up b, 4\\n psh 1\\n xor b\\n ret  \" -dDELAY=10 -xdevice"
+      "commandLineArgs": "-fscript.sasm -dDELAY=10 -xdevice"
     }
   }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
-using System.Xml.Serialization;
-
 using SCAMP;
+using SCAMPCompile.DeviceParser;
 
 namespace SCAMPCompile
 {
@@ -63,16 +63,11 @@ namespace SCAMPCompile
                                         device_str = File.ReadAllText(key + ".xml");
                                         device_str.Replace("\r", "");
                                         device_str.Replace("\n", "");
-                                        XmlSerializer serializer = new XmlSerializer(typeof(Device));
-                                        TextReader reader = new StringReader(device_str);
-                                        device = (Device)serializer.Deserialize(reader);
-                                        //Console.WriteLine(device.name);
-                                        //var fs = new FileStream(key + ".xml", FileMode.Open);
 
-                                        //device = serializer.Deserialize() as Device;
-                                        foreach (var port in device.Port)
+                                        DeviceXmlParser _parser = new DeviceXmlParser(device_str);
+                                        foreach (var port in _parser.Nodes.Where(n=>n.Name.CompareTo("Port") == 0))
                                         {
-                                            constants.Add(new Constant() { Name = port.Alias, Value = port.Address.ToString() });
+                                            constants.Add(new Constant() { Name = port.GetPropertyValue("Alias"), Value = port.GetPropertyValue("Address") });
                                         }
                                     }
                                     catch (Exception e)
@@ -80,12 +75,18 @@ namespace SCAMPCompile
                                         device = new Device();
                                         string errorMessage = "";
                                         errorMessage+= "Device XML serialize exception! Message:" + e.Message;
-                                        Exception t = e.InnerException;
-                                        do
+
+                                        string msg = "";
+                                        var _exc = e;
+                                        while (_exc != null && _exc.InnerException != null)
                                         {
-                                            errorMessage+=t.Message;
-                                            t = t.InnerException;
-                                        } while (t.InnerException != null);
+                                            msg += _exc.Message;
+                                            _exc = _exc.InnerException;
+                                        }
+                                        errorMessage += $" IE: {msg}";
+
+                                        errorMessage += $" ST: {e.StackTrace}";
+                                        errorMessage = errorMessage.Replace("/n", "").Replace("/r", "");
 
                                         Console.WriteLine($"{{\"result\": -4, \"message\": \"{errorMessage}\"}}");
                                         return;
@@ -125,7 +126,11 @@ namespace SCAMPCompile
                     {
                         binPropgram += b.ToString("X2");
                     }
-                    Console.WriteLine($"{{\"result\": 1, \"message\":\"{binPropgram}\"}}");
+
+                    if (string.IsNullOrWhiteSpace(binPropgram))
+                        Console.WriteLine($"{{\"result\": -5, \"message\": \"Bad program\"}}");
+                    else 
+                        Console.WriteLine($"{{\"result\": 1, \"message\":\"{binPropgram}\"}}");
                     return;
                 }
                 catch (Exception exc)
