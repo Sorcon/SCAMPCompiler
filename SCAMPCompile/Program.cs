@@ -129,7 +129,10 @@ namespace SCAMPCompile
 
                     if (string.IsNullOrWhiteSpace(binPropgram))
                         Console.WriteLine($"{{\"result\": -5, \"message\": \"Bad program\"}}");
-                    else 
+                    else if (binPropgram.Length > 510)
+                        Console.WriteLine($"{{\"result\": -6, \"message\": \"Program is huge\"}}");
+
+                    else
                         Console.WriteLine($"{{\"result\": 1, \"message\":\"{binPropgram}\"}}");
                     return;
                 }
