@@ -4,11 +4,11 @@
 Компилятор кроссплатформенный под .NET Core, так что необходимо установить .NET Core как зависимость с сайта https://dotnet.microsoft.com/download
 
 * Linux:
-    1) скачать Runtime .NET Core для Linux
-    2) добавить в PATH директорию с исполняемым файлом dotnet
+    1. скачать Runtime .NET Core для Linux
+    2. добавить в PATH директорию с исполняемым файлом dotnet
 
 * Windows:
-    1) скачать и установить .NET Core для Windows
+    1. скачать и установить .NET Core для Windows
 
 Для запуска компилятора используются параметры:
 
